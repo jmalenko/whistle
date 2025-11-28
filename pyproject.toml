@@ -1,0 +1,12 @@
+[project]
+name = "whistle"
+version = "0.1.0"
+description = "A whistle with name"
+requires-python = ">=3.12"
+dependencies = [
+    "build123d>=0.10.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_backend"
