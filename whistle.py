@@ -19,17 +19,19 @@ TOOTH_OFFSET = 1
 TOOTH_HEIGHT = 0.8
 TOOTH_LENGTH = 2
 
-with BuildPart() as part:
+with BuildPart() as whistle:
+    h2 = TOTAL_HEIGHT / 2
+    hole_r = h2 - HOLE_WALL_THICKNESS
+    mouth = TOTAL_LENGTH - h2
+    cutout_x = mouth - CUTOUT_OFFSET
     with BuildSketch() as sketch:
-        h2 = TOTAL_HEIGHT / 2
         Circle(h2)
 
-        mouth = TOTAL_LENGTH - h2
         Rectangle(mouth, TOTAL_HEIGHT, align=(Align.MIN, Align.CENTER))
 
-        Circle(h2 - HOLE_WALL_THICKNESS, mode=Mode.SUBTRACT)
+        Circle(hole_r, mode=Mode.SUBTRACT)
 
-        with Locations((mouth - CUTOUT_OFFSET, h2)):
+        with Locations((cutout_x, h2)):
             Polygon(
                 (0, 0), 
                 (0, -CUTOUT_HEIGHT), 
@@ -47,8 +49,18 @@ with BuildPart() as part:
     
     extrude(amount=TOTAL_WIDTH)
 
+    with BuildSketch(Plane.XY.offset(WALL_THICKNESS)) as sketch:
+        h2 = TOTAL_HEIGHT / 2 - WALL_THICKNESS
+        inner_x = hole_r + WALL_THICKNESS + h2
+        with Locations((inner_x, 0)):
+            Circle(h2)
+            Rectangle(cutout_x - inner_x, 2 * h2, 
+                      align=(Align.MIN, Align.CENTER))
 
-export_step(part.part, "whistle.step")
+    extrude(amount=TOTAL_WIDTH - 2*WALL_THICKNESS, mode=Mode.SUBTRACT)
 
-show(part, reset_camera=False)
+
+export_step(whistle.part, "whistle.step")
+
+show(whistle, reset_camera=False)
 
