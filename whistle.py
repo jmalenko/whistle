@@ -35,7 +35,19 @@ NAME_EXTRUDE_HEIGHT = 0.4
 name = sys.argv[1] if len(sys.argv) > 1 else None
 if not name: name = "N A M E" # For demo purposes
 
+
 assert TUNNEL_CUTOUT_LENGTH < CUTOUT_OFFSET, "Tunnel cutout too long!"
+
+
+def find_colinear_edges(part, reference_edges, tolerance=0.01):
+    collinear_edges = []
+    for ref_edge in reference_edges:
+        ref_pos = ref_edge @ 0.5  # midpoint
+        for edge in part.edges():
+            edge_pos = edge @ 0.5
+            if abs(edge_pos.Y - ref_pos.Y) < tolerance and abs(edge_pos.Z - ref_pos.Z) < tolerance:
+                collinear_edges.append(edge)
+    return list(set(collinear_edges))
 
 with BuildPart() as whistle:
     h2 = TOTAL_HEIGHT / 2
@@ -114,29 +126,11 @@ with BuildPart() as whistle:
     # Chamfer the long outside edges
 
     # Get the 4 longest edges parallel to X axis
-    longest_edges = whistle.edges().filter_by(Axis.X).sort_by(SortBy.LENGTH, reverse=True)[:4]
-    
-    # Find all edges collinear with these longest edges
-    chamfer_edges = []
-    tolerance = 0.01  # mm
-    
-    for ref_edge in longest_edges:
-        # Get reference edge position (Y, Z coordinates)
-        ref_pos = ref_edge @ 0.5  # midpoint
-        
-        # Find all X-parallel edges at the same Y,Z position
-        for edge in whistle.edges().filter_by(Axis.X):
-            edge_pos = edge @ 0.5
-            # Check if Y and Z coordinates match (collinear in X direction)
-            if abs(edge_pos.Y - ref_pos.Y) < tolerance and abs(edge_pos.Z - ref_pos.Z) < tolerance:
-                chamfer_edges.append(edge)
-    
-    # Remove duplicates
-    chamfer_edges = list(set(chamfer_edges))
-    
-    # TODO Chamfer the edges closer to mouth
-    # chamfer(chamfer_edges, length=CHAMFER)
-    chamfer(longest_edges, length=CHAMFER)
+    longest_edges = whistle.edges().filter_by(Axis.X).sort_by(SortBy.LENGTH)[-4:]
+    chamfer_edges = find_colinear_edges(whistle.part, longest_edges)
+    # Filter out edges that are too short for chamfering
+    chamfer_edges = [e for e in chamfer_edges if 2*CHAMFER < e.length]
+    chamfer(chamfer_edges, length=CHAMFER)
 
     # Chamfer the circular hole edges
     chamfer(hole_edges, length=HOLE_CHAMFER)
