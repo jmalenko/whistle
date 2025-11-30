@@ -1,5 +1,6 @@
 from build123d import *
 from ocp_vscode import show
+import sys
 
 # Dimensions
 TOTAL_LENGTH = 48.0 # mm
@@ -9,7 +10,7 @@ TOTAL_HEIGHT = TOTAL_WIDTH
 WALL_THICKNESS = 1.2
 
 HOLE_WALL_THICKNESS = 2.0
-HOLE_DIAMETER = 10.0
+HOLE_DIAMETER = TOTAL_HEIGHT - 2 * HOLE_WALL_THICKNESS
 
 CUTOUT_HEIGHT = TOTAL_HEIGHT * 0.4
 CUTOUT_LENGTH = 6
@@ -26,6 +27,12 @@ TUNNEL_CUTOUT_WIDTH = TOTAL_WIDTH - 2 * WALL_THICKNESS - 2 * 1
 
 CHAMFER = 1
 HOLE_CHAMFER = 0.6
+
+NAME_SIZE = TOTAL_HEIGHT * 0.6
+NAME_EXTRUDE_HEIGHT = 0.4
+
+name = sys.argv[1] if len(sys.argv) > 1 else None
+if not name: name = "N A M E" # For demo purposes
 
 assert TUNNEL_CUTOUT_LENGTH < CUTOUT_OFFSET, "Tunnel cutout too long!"
 
@@ -132,6 +139,22 @@ with BuildPart() as whistle:
 
     # Chamfer the circular hole edges
     chamfer(hole_edges, length=HOLE_CHAMFER)
+
+    # Add name text if provided
+    
+    if name:
+        text_min_x = HOLE_DIAMETER / 2 + HOLE_CHAMFER
+        margin = (TOTAL_HEIGHT - NAME_SIZE) / 2
+        text_max_x = cutout_x - CUTOUT_LENGTH + CUTOUT_LENGTH * margin / CUTOUT_HEIGHT
+        text_center_x = text_min_x + (text_max_x - text_min_x) / 2
+        
+        with BuildSketch(Plane.XY.offset(TOTAL_HEIGHT)):
+            with Locations((text_center_x, 0)):
+                Text(name, font_size=NAME_SIZE, font="Arial", font_style=FontStyle.BOLD, 
+                    align=(Align.CENTER, Align.CENTER))
+
+        extrude(amount=NAME_EXTRUDE_HEIGHT)
+
 
 export_step(whistle.part, "whistle.step")
 
