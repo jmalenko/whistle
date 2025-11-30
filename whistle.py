@@ -24,6 +24,9 @@ TUNNEL_CUTOUT_LENGTH = 2
 TUNNEL_CUTOUT_HEIGHT = 1.5
 TUNNEL_CUTOUT_WIDTH = TOTAL_WIDTH - 2 * WALL_THICKNESS - 2 * 1
 
+CHAMFER = 1
+HOLE_CHAMFER = 0.6
+
 assert TUNNEL_CUTOUT_LENGTH < CUTOUT_OFFSET, "Tunnel cutout too long!"
 
 with BuildPart() as whistle:
@@ -34,7 +37,7 @@ with BuildPart() as whistle:
 
     # Body
 
-    with BuildSketch() as sketch:
+    with BuildSketch() as side_sketch:
         Circle(h2)
 
         Rectangle(mouth_x, TOTAL_HEIGHT, align=(Align.MIN, Align.CENTER))
@@ -63,7 +66,7 @@ with BuildPart() as whistle:
     # Inner space
 
     h3 = TOTAL_HEIGHT / 2 - WALL_THICKNESS
-    with BuildSketch(Plane.XY.offset(WALL_THICKNESS)) as sketch:
+    with BuildSketch(Plane.XY.offset(WALL_THICKNESS)) as inner_sketch:
         inner_x = hole_r + WALL_THICKNESS + h3
         with Locations((inner_x, 0)):
             Circle(h3)
@@ -73,7 +76,7 @@ with BuildPart() as whistle:
     extrude(amount=TOTAL_WIDTH - 2*WALL_THICKNESS, mode=Mode.SUBTRACT)
 
     # Tunnel - straight by cutout
-    with BuildSketch(Plane.YZ.offset(cutout_x)) as sketch:
+    with BuildSketch(Plane.YZ.offset(cutout_x)) as tunnel_sketch:
         with Locations((h2 - WALL_THICKNESS, h2)):
             Rectangle(TUNNEL_CUTOUT_HEIGHT, TUNNEL_CUTOUT_WIDTH,
                       align=(Align.MAX, Align.CENTER))
@@ -91,6 +94,34 @@ with BuildPart() as whistle:
 
     loft(sections=[tunnel_start_face, circle_face], mode=Mode.SUBTRACT)
 
+    # Chamfer
+
+    # Chamfer the long outside edges
+
+    # Get the 4 longest edges parallel to X axis
+    longest_edges = whistle.edges().filter_by(Axis.X).sort_by(SortBy.LENGTH, reverse=True)[:4]
+    
+    # Find all edges collinear with these longest edges
+    chamfer_edges = []
+    tolerance = 0.01  # mm
+    
+    for ref_edge in longest_edges:
+        # Get reference edge position (Y, Z coordinates)
+        ref_pos = ref_edge @ 0.5  # midpoint
+        
+        # Find all X-parallel edges at the same Y,Z position
+        for edge in whistle.edges().filter_by(Axis.X):
+            edge_pos = edge @ 0.5
+            # Check if Y and Z coordinates match (collinear in X direction)
+            if abs(edge_pos.Y - ref_pos.Y) < tolerance and abs(edge_pos.Z - ref_pos.Z) < tolerance:
+                chamfer_edges.append(edge)
+    
+    # Remove duplicates
+    chamfer_edges = list(set(chamfer_edges))
+    
+    # TODO Chamfer the edges closer to mouth
+    # chamfer(chamfer_edges, length=CHAMFER)
+    chamfer(longest_edges, length=CHAMFER)
 
 export_step(whistle.part, "whistle.step")
 
