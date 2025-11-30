@@ -19,7 +19,7 @@ TOOTH_OFFSET = 1
 TOOTH_HEIGHT = 0.8
 TOOTH_LENGTH = 2
 
-TUNNEL_mouth_x_RADIUS = TOTAL_WIDTH / 2 - WALL_THICKNESS
+TUNNEL_MOUTH_X_RADIUS = TOTAL_WIDTH / 2 - WALL_THICKNESS
 TUNNEL_CUTOUT_LENGTH = 2
 TUNNEL_CUTOUT_HEIGHT = 1.5
 TUNNEL_CUTOUT_WIDTH = TOTAL_WIDTH - 2 * WALL_THICKNESS - 2 * 1
@@ -94,7 +94,7 @@ with BuildPart() as whistle:
     tunnel_start_face = whistle.faces().filter_by(Plane.YZ.offset(cutout_x - TUNNEL_CUTOUT_LENGTH)).sort_by(Axis.X)[1]
 
     circle_wire = Wire.make_circle(
-        TUNNEL_mouth_x_RADIUS, 
+        TUNNEL_MOUTH_X_RADIUS, 
         plane=Plane(origin=(mouth_x, 0, h2), x_dir=(0, 1, 0), z_dir=(1, 0, 0))
     )
     circle_face = Face(circle_wire)
