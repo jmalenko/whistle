@@ -28,7 +28,8 @@ TUNNEL_CUTOUT_WIDTH = TOTAL_WIDTH - 2 * WALL_THICKNESS - 2 * 1
 CHAMFER = 1
 HOLE_CHAMFER = 0.6
 
-NAME_SIZE = TOTAL_HEIGHT * 0.6
+NAME_SIZE = TOTAL_HEIGHT * 0.6 # Default name size. If the name is too long,the size will be reduced to fit.
+NAME_MARGIN = 0.4
 NAME_EXTRUDE_HEIGHT = 0.4
 
 name = sys.argv[1] if len(sys.argv) > 1 else None
@@ -144,13 +145,38 @@ with BuildPart() as whistle:
     
     if name:
         text_min_x = HOLE_DIAMETER / 2 + HOLE_CHAMFER
-        margin = (TOTAL_HEIGHT - NAME_SIZE) / 2
-        text_max_x = cutout_x - CUTOUT_LENGTH + CUTOUT_LENGTH * margin / CUTOUT_HEIGHT
-        text_center_x = text_min_x + (text_max_x - text_min_x) / 2
         
+        # Start with desired font size and reduce until text fits
+        font_size = NAME_SIZE
+        font="Arial"
+        font_style=FontStyle.BOLD 
+        
+        while font_size > 1:
+            temp_text = Compound.make_text(
+                name, 
+                font_size=font_size, 
+                font=font, 
+                font_style=font_style
+            )
+            text_bbox = temp_text.bounding_box()
+            text_width = text_bbox.max.X - text_bbox.min.X
+            text_height = text_bbox.max.Y - text_bbox.min.Y
+
+            margin = (TOTAL_HEIGHT - text_height) / 2
+            text_max_x = cutout_x - CUTOUT_LENGTH + CUTOUT_LENGTH * margin / CUTOUT_HEIGHT
+            available_width = text_max_x - text_min_x - 2 * NAME_MARGIN
+
+            if text_width <= available_width:
+                break
+            else:
+                font_size -= 0.1
+        
+        print(f"Using font size {font_size:.1f} for name '{name}'")
+        text_center_x = text_min_x + (text_max_x - text_min_x) / 2
+
         with BuildSketch(Plane.XY.offset(TOTAL_HEIGHT)):
             with Locations((text_center_x, 0)):
-                Text(name, font_size=NAME_SIZE, font="Arial", font_style=FontStyle.BOLD, 
+                Text(name, font_size=font_size, font=font, font_style=font_style, 
                     align=(Align.CENTER, Align.CENTER))
 
         extrude(amount=NAME_EXTRUDE_HEIGHT)
