@@ -63,6 +63,13 @@ with BuildPart() as whistle:
     
     extrude(amount=TOTAL_WIDTH)
 
+    # Save the circular hole edges from the extrusion
+    hole_edges = []
+    for e in whistle.edges():
+        if e.geom_type == GeomType.CIRCLE:
+            if e.radius == hole_r:
+                hole_edges.append(e)
+
     # Inner space
 
     h3 = TOTAL_HEIGHT / 2 - WALL_THICKNESS
@@ -122,6 +129,9 @@ with BuildPart() as whistle:
     # TODO Chamfer the edges closer to mouth
     # chamfer(chamfer_edges, length=CHAMFER)
     chamfer(longest_edges, length=CHAMFER)
+
+    # Chamfer the circular hole edges
+    chamfer(hole_edges, length=HOLE_CHAMFER)
 
 export_step(whistle.part, "whistle.step")
 
