@@ -1,5 +1,6 @@
 from build123d import *
 from ocp_vscode import show
+from math import *
 import sys
 
 # Dimensions
@@ -25,7 +26,8 @@ TUNNEL_CUTOUT_LENGTH = 2
 TUNNEL_CUTOUT_HEIGHT = 1.5
 TUNNEL_CUTOUT_WIDTH = TOTAL_WIDTH - 2 * WALL_THICKNESS - 2 * 1
 
-CHAMFER = 1
+CHAMFER = 1.0
+CHAMFER_INNER = (CHAMFER * sqrt(2) / 2 + WALL_THICKNESS - WALL_THICKNESS * sqrt(2)) * sqrt(2) # Chamfer to ensure min wall thickness in corners
 HOLE_CHAMFER = 0.6
 
 NAME_SIZE = TOTAL_HEIGHT * 0.6 # Default name size. If the name is too long,the size will be reduced to fit.
@@ -34,6 +36,8 @@ NAME_EXTRUDE_HEIGHT = 0.4
 
 name = sys.argv[1] if len(sys.argv) > 1 else None
 if not name: name = "N A M E" # For demo purposes
+
+EPSILON = 1e-3
 
 
 assert TUNNEL_CUTOUT_LENGTH < CUTOUT_OFFSET, "Tunnel cutout too long!"
@@ -124,13 +128,20 @@ with BuildPart() as whistle:
     # Chamfer
 
     # Chamfer the long outside edges
-
     # Get the 4 longest edges parallel to X axis
     longest_edges = whistle.edges().filter_by(Axis.X).sort_by(SortBy.LENGTH)[-4:]
     chamfer_edges = find_colinear_edges(whistle.part, longest_edges)
     # Filter out edges that are too short for chamfering
     chamfer_edges = [e for e in chamfer_edges if 2*CHAMFER < e.length]
     chamfer(chamfer_edges, length=CHAMFER)
+
+    # Chamfer the inner edges - this needed to ensure wall thiskness in the corners
+    # Filter edges that are in the middle (not on top or bottom faces)
+    inner_edges = whistle.edges().filter_by(Axis.X)
+    inner_edges = [e for e in inner_edges if WALL_THICKNESS - EPSILON < (e @ 0.5).Z < TOTAL_WIDTH - WALL_THICKNESS + EPSILON]
+    # To avoid chamfering short edges in the tunnel
+    inner_edges = [e for e in inner_edges if TUNNEL_CUTOUT_LENGTH + EPSILON< e.length]
+    chamfer(inner_edges, length=CHAMFER_INNER)
 
     # Chamfer the circular hole edges
     chamfer(hole_edges, length=HOLE_CHAMFER)
