@@ -31,7 +31,7 @@ CHAMFER_INNER = (CHAMFER * sqrt(2) / 2 + WALL_THICKNESS - WALL_THICKNESS * sqrt(
 FILLET_INNER_Z_RADIUS = (TOTAL_HEIGHT - CUTOUT_HEIGHT - WALL_THICKNESS - 1) / 2
 HOLE_CHAMFER = 0.6
 
-NAME_SIZE = TOTAL_HEIGHT * 0.6 # Default name size. If the name is too long,the size will be reduced to fit.
+NAME_SIZE = TOTAL_HEIGHT * 0.6 # Default name size. If the name is too long, the size will be reduced to fit.
 NAME_MARGIN = 0.4
 NAME_EXTRUDE_HEIGHT = 0.4
 
@@ -73,7 +73,7 @@ with BuildPart() as whistle:
 
     # Body
 
-    with BuildSketch() as side_sketch:
+    with BuildSketch():
         Circle(h2)
 
         Rectangle(mouth_x, TOTAL_HEIGHT, align=(Align.MIN, Align.CENTER))
@@ -109,7 +109,7 @@ with BuildPart() as whistle:
     # Inner space
 
     h3 = TOTAL_HEIGHT / 2 - WALL_THICKNESS
-    with BuildSketch(Plane.XY.offset(WALL_THICKNESS)) as inner_sketch:
+    with BuildSketch(Plane.XY.offset(WALL_THICKNESS)):
         inner_x = hole_r + WALL_THICKNESS + h3
         with Locations((inner_x, 0)):
             Circle(h3)
@@ -119,7 +119,7 @@ with BuildPart() as whistle:
     extrude(amount=TOTAL_WIDTH - 2*WALL_THICKNESS, mode=Mode.SUBTRACT)
 
     # Tunnel - straight by cutout
-    with BuildSketch(Plane.YZ.offset(cutout_x)) as tunnel_sketch:
+    with BuildSketch(Plane.YZ.offset(cutout_x)):
         with Locations((h2 - WALL_THICKNESS, h2)):
             Rectangle(TUNNEL_CUTOUT_HEIGHT, TUNNEL_CUTOUT_WIDTH,
                       align=(Align.MAX, Align.CENTER))
@@ -152,7 +152,7 @@ with BuildPart() as whistle:
     inner_edges = whistle.edges().filter_by(Axis.X)
     inner_edges = [e for e in inner_edges if WALL_THICKNESS - EPSILON < (e @ 0.5).Z < TOTAL_WIDTH - WALL_THICKNESS + EPSILON]
     # To avoid chamfering short edges in the tunnel
-    inner_edges = [e for e in inner_edges if TUNNEL_CUTOUT_LENGTH + EPSILON< e.length]
+    inner_edges = [e for e in inner_edges if TUNNEL_CUTOUT_LENGTH + EPSILON < e.length]
     chamfer(inner_edges, length=CHAMFER_INNER)
 
     # Fillet the inner edge that is perpendicular - for smoother air flow
