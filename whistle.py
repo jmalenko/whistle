@@ -28,6 +28,7 @@ TUNNEL_CUTOUT_WIDTH = TOTAL_WIDTH - 2 * WALL_THICKNESS - 2 * 1
 
 CHAMFER = 1.0
 CHAMFER_INNER = (CHAMFER * sqrt(2) / 2 + WALL_THICKNESS - WALL_THICKNESS * sqrt(2)) * sqrt(2) # Chamfer to ensure min wall thickness in corners
+FILLET_INNER_Z_RADIUS = (TOTAL_HEIGHT - CUTOUT_HEIGHT - WALL_THICKNESS - 1) / 2
 HOLE_CHAMFER = 0.6
 
 NAME_SIZE = TOTAL_HEIGHT * 0.6 # Default name size. If the name is too long,the size will be reduced to fit.
@@ -52,6 +53,17 @@ def find_colinear_edges(part, reference_edges, tolerance=0.01):
             if abs(edge_pos.Y - ref_pos.Y) < tolerance and abs(edge_pos.Z - ref_pos.Z) < tolerance:
                 collinear_edges.append(edge)
     return list(set(collinear_edges))
+
+def filter_edges_by_position(edges, x=None, y=None, z=None, epsilon=EPSILON):
+    """Filter edges by their midpoint position. None means no filter for that axis."""
+    filtered = edges
+    if x is not None:
+        filtered = [e for e in filtered if x - epsilon < (e @ 0.5).X < x + epsilon]
+    if y is not None:
+        filtered = [e for e in filtered if y - epsilon < (e @ 0.5).Y < y + epsilon]
+    if z is not None:
+        filtered = [e for e in filtered if z - epsilon < (e @ 0.5).Z < z + epsilon]
+    return filtered
 
 with BuildPart() as whistle:
     h2 = TOTAL_HEIGHT / 2
@@ -125,7 +137,7 @@ with BuildPart() as whistle:
 
     loft(sections=[tunnel_start_face, circle_face], mode=Mode.SUBTRACT)
 
-    # Chamfer
+    # Chamfer & fillet
 
     # Chamfer the long outside edges
     # Get the 4 longest edges parallel to X axis
@@ -135,13 +147,18 @@ with BuildPart() as whistle:
     chamfer_edges = [e for e in chamfer_edges if 2*CHAMFER < e.length]
     chamfer(chamfer_edges, length=CHAMFER)
 
-    # Chamfer the inner edges - this needed to ensure wall thiskness in the corners
+    # Chamfer the inner edges - this needed to ensure wall thickness in the corners
     # Filter edges that are in the middle (not on top or bottom faces)
     inner_edges = whistle.edges().filter_by(Axis.X)
     inner_edges = [e for e in inner_edges if WALL_THICKNESS - EPSILON < (e @ 0.5).Z < TOTAL_WIDTH - WALL_THICKNESS + EPSILON]
     # To avoid chamfering short edges in the tunnel
     inner_edges = [e for e in inner_edges if TUNNEL_CUTOUT_LENGTH + EPSILON< e.length]
     chamfer(inner_edges, length=CHAMFER_INNER)
+
+    # Fillet the inner edge that is perpendicular - for smoother air flow
+    inner_edges_z = whistle.edges().filter_by(Axis.Z)
+    inner_edges_z = filter_edges_by_position(inner_edges_z, x=cutout_x, y=-h2 + WALL_THICKNESS)
+    fillet(inner_edges_z, radius=FILLET_INNER_Z_RADIUS)
 
     # Chamfer the circular hole edges
     chamfer(hole_edges, length=HOLE_CHAMFER)
