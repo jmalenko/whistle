@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 from build123d import *
-from ocp_vscode import show
+from ocp_vscode import show, Camera
 from math import *
 import sys
 
@@ -253,6 +253,6 @@ export_step(whistle.part, output_file)
 
 # Only show in viewer if OCP viewer is available (not in batch mode)
 try:
-    show(whistle, reset_camera=False)
+    show(whistle, reset_camera=Camera.KEEP)
 except RuntimeError:
     pass
