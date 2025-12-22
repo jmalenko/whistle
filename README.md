@@ -77,7 +77,9 @@ whistle-E_V_A.step
 
 ## Print instructions
 
-- use at least 4 perimeters. 
-- no supports, print on side (so the potential name is at the top).
+- Use at least 4 perimeters &mdash; even three layers sometimes leave micro holes between the strings of filament.
+- No supports needed.
+- Rotate such that the potential name is on top. (This should be the default orientation.)
+- Add color change (for name) at layer just above 10 mm.
 
 Besides that, there are no special conditions. I print this whistle with PLA, 0.2 layer height.
