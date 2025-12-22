@@ -27,8 +27,8 @@ There are several options:
 
 ```
 git clone https://github.com/jmalenko/whistle.git
-source .venv/bin/activate
 chmod a+x *.py *.sh
+source .venv/bin/activate
 ```
 
 2. Create the model with NAME by running with
