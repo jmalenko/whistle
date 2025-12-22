@@ -67,7 +67,7 @@ The generated models are stored in `models` directory with the following names:
 ```
 whistle-ANNA.step
 whistle-Betty.step
-whistle-E V A.step
+whistle-E_V_A.step
 ```
 
 ## Print instructions
