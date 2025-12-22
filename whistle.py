@@ -250,6 +250,7 @@ with BuildPart() as whistle:
 
 
 export_step(whistle.part, output_file)
+# export_stl(whistle.part, output_file + ".stl")
 
 # Only show in viewer if OCP viewer is available (not in batch mode)
 try:
