@@ -42,8 +42,8 @@ NAME_MARGIN = 0.4
 NAME_EXTRUDE_HEIGHT = 0.4
 
 name = sys.argv[1] if len(sys.argv) > 1 else None
-if not name:
-    name = "N A M E"  # For demo purposes
+# if not name:
+#     name = "N A M E"  # For demo purposes
 
 EPSILON = 1e-3
 
