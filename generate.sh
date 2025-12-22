@@ -14,10 +14,8 @@ while IFS= read -r name; do
     
     echo "Generating whistle for: $name"
     
-    python whistle.py "$name"
-    
     filename=$(echo "$name" | tr ' ' '_')
-    mv whistle.step "$OUTPUT_DIR/whistle-${filename}.step"
+    python whistle.py "$name" -o "$OUTPUT_DIR/whistle-${filename}.step"
     
 done < names.txt
 

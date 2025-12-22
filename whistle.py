@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 from build123d import *
 from ocp_vscode import show
 from math import *
@@ -41,14 +42,25 @@ NAME_SIZE = (
 NAME_MARGIN = 0.4
 NAME_EXTRUDE_HEIGHT = 0.4
 
-name = sys.argv[1] if len(sys.argv) > 1 else None
-# if not name:
-#     name = "N A M E"  # For demo purposes
-
 EPSILON = 1e-3
 
 
 assert TUNNEL_CUTOUT_LENGTH < CUTOUT_OFFSET, "Tunnel cutout too long!"
+
+
+# Parse command line arguments
+name = None
+output_file = "whistle.step"
+
+args = sys.argv[1:]
+i = 0
+while i < len(args):
+    if args[i] == "-o" and i + 1 < len(args):
+        output_file = args[i + 1]
+        i += 2
+    else:
+        name = args[i]
+        i += 1
 
 
 def find_colinear_edges(part, reference_edges, tolerance=0.01):
@@ -237,11 +249,10 @@ with BuildPart() as whistle:
         extrude(amount=NAME_EXTRUDE_HEIGHT)
 
 
-export_step(whistle.part, "whistle.step")
+export_step(whistle.part, output_file)
 
 # Only show in viewer if OCP viewer is available (not in batch mode)
 try:
     show(whistle, reset_camera=False)
 except RuntimeError:
     pass
-
