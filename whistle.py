@@ -239,4 +239,9 @@ with BuildPart() as whistle:
 
 export_step(whistle.part, "whistle.step")
 
-show(whistle, reset_camera=False)
+# Only show in viewer if OCP viewer is available (not in batch mode)
+try:
+    show(whistle, reset_camera=False)
+except RuntimeError:
+    pass
+
