@@ -2,6 +2,9 @@
 
 A loud and safe whistle which can be customized with a name.
 
+![Whistle with name ANNA](pictures/01-ANNA.jpg)
+
+
 ## Main features:
 
 - Nice loud sound.
