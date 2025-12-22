@@ -19,57 +19,60 @@ There are several options:
 
 ### 1. Get the file and print it
 
-- Use "Whistle for VF.step".
+- Download [whistle.step](https://raw.githubusercontent.com/jmalenko/whistle/refs/heads/main/whistle.step)
 
 ### 2. Add a name to the model
 
-Setup
+1. Setup
 
 ```
 git clone https://github.com/jmalenko/whistle.git
 source .venv/bin/activate
-chmod a+x whistle.py
+chmod a+x *.py *.sh
 ```
 
-Create modele with name
+2. Create the model with NAME by running with
 
 ```
-./whistle.py ANNA
+./whistle.py NAME
+```
+
+The output is stored in `whistle.step`.
+
+
+Alternatively, you can define the output file with `-o` parameter:
+
+```
+./whistle.py -o my_whistle.step NAME
 ```
 
 
 ### 3. Generate several models with names
 
-TODO
+1. Setup as in previous step 2.
 
-## Print instructions:
+2. Put the names to `names.txt`. For example:
+```
+ANNA
+Betty
+E V A
+```
+
+3. Generate models
+```
+./generate.sh
+```
+
+The generated models are stored in `models` directory with the following names:
+```
+whistle-ANNA.step
+whistle-Betty.step
+whistle-E V A.step
+```
+
+## Print instructions
 
 - use at least 4 perimeters. 
 - no supports, print on side (so the potential name is at the top).
 
 Besides that, there are no special conditions. I print this whistle with PLA, 0.2 layer height.
-
-
-
-# Development tips
-
-Run in terminal:
-```
-.venv/bin/python whistle.py
-```
-or
-```
-source .venv/bin/activate
-chmod a+x whistle.py
-./whistle.py
-```
-
-# Development tips
-
-## Show part as the code is updated
-
-Configure IDE to save file immediately. Add to `settings.json`:
-```
-    "files.autoSave": "afterDelay",
-    "files.autoSaveDelay": 500
-```
