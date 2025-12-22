@@ -22,7 +22,7 @@ There are several options:
 
 ### 1. Get the file and print it
 
-- Download [whistle.step](https://raw.githubusercontent.com/jmalenko/whistle/refs/heads/main/whistle.step)
+Download [whistle.step](whistle.step).
 
 ### 2. Add a name to the model
 
