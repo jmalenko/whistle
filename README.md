@@ -31,23 +31,25 @@ chmod a+x *.py *.sh
 source .venv/bin/activate
 ```
 
-2. Create the model with NAME by running with
+2. Create the model with *ANNA* by running with
 
 ```
-./whistle.py NAME
+./whistle.py ANNA
 ```
 
 The output is stored in `whistle.step`.
 
 
-Alternatively, you can define the output file with `-o` parameter:
+### 3. Optional: advanced example
+
+To create a whistle model with name *A N N A* (with spaces between letters) that is saved to file `my_whistle.step `, run:
 
 ```
-./whistle.py -o my_whistle.step NAME
+./whistle.py -o my_whistle.step "A N N A"
 ```
 
 
-### 3. Generate several models with names
+### 4. Generate several models with names
 
 1. Setup as in previous step 2.
 
