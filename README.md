@@ -43,12 +43,24 @@ source .venv/bin/activate
 The output is stored in `whistle.step`.
 
 
-### 3. Optional: advanced example
+### 3. Optional: Advanced examples
 
-To create a whistle model with name *A N N A* (with spaces between letters) that is saved to file `my_whistle.step `, run:
+To create a whistle model with name *A N N A* (with spaces between letters) that is saved to file `my_whistle.step`, run:
 
 ```
 ./whistle.py -o my_whistle.step "A N N A"
+```
+
+The output file format is automatically detected from the extension. Supported formats: `.step`, `.stl`, `.3mf`
+
+To export as STL:
+```
+./whistle.py -o my_whistle.stl "A N N A"
+```
+
+To force a specific format regardless of the file extension, use the `-t` parameter:
+```
+./whistle.py -o output.file -t stl "A N N A"
 ```
 
 

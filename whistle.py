@@ -3,6 +3,7 @@ from build123d import *
 from ocp_vscode import show, Camera
 from math import *
 import sys
+import os
 
 # Dimensions
 TOTAL_LENGTH = 48.0  # mm
@@ -50,7 +51,8 @@ assert TUNNEL_CUTOUT_LENGTH < CUTOUT_OFFSET, "Tunnel cutout too long!"
 
 # Parse command line arguments
 name = None
-output_file = "whistle.step"
+output_file = None
+file_type = None  # Can be overridden with -t parameter
 
 args = sys.argv[1:]
 i = 0
@@ -58,9 +60,30 @@ while i < len(args):
     if args[i] == "-o" and i + 1 < len(args):
         output_file = args[i + 1]
         i += 2
+    elif args[i] == "-t" and i + 1 < len(args):
+        file_type = args[i + 1].lower()
+        i += 2
+    elif args[i] in ["-h", "--help"]:
+        print("Usage: whistle.py [NAME] [-o OUTPUT_FILE] [-t FILE_TYPE]")
+        print("  NAME: Optional name to emboss on the whistle")
+        print("  -o OUTPUT_FILE: The output file path")
+        print("     Default: whistle with extension based on file type")
+        print("  -t FILE_TYPE: Export type (step, stl, or 3mf)")
+        print("     Default; detected from output file extension if specified, otherwise defaults to STEP")
+        sys.exit(0)
     else:
         name = args[i]
         i += 1
+
+if output_file is None:
+    if file_type is None:
+        file_type = "step"
+    output_file = "whistle." + file_type
+
+if file_type is None:
+    # Auto-detect from file extension
+    _, ext = os.path.splitext(output_file)
+    file_type = ext.lstrip('.').lower()
 
 
 def find_colinear_edges(part, reference_edges, tolerance=0.01):
@@ -249,8 +272,18 @@ with BuildPart() as whistle:
         extrude(amount=NAME_EXTRUDE_HEIGHT)
 
 
-export_step(whistle.part, output_file)
-# export_stl(whistle.part, output_file + ".stl")
+# Export in the appropriate format
+print(f"Exporting to {output_file} in {file_type.upper()} format...")
+if file_type == 'step':
+    export_step(whistle.part, output_file)
+elif file_type == 'stl':
+    export_stl(whistle.part, output_file)
+elif file_type == '3mf':
+    export_3mf(whistle.part, output_file)
+else:
+    print(f"Error: Unsupported file type '{file_type}'")
+    sys.exit(1)
+
 
 # Only show in viewer if OCP viewer is available (not in batch mode)
 try:
