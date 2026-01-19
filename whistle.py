@@ -288,5 +288,5 @@ else:
 # Only show in viewer if OCP viewer is available (not in batch mode)
 try:
     show(whistle, reset_camera=Camera.KEEP)
-except RuntimeError:
+except (UserWarning, RuntimeError):
     pass
