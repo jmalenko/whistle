@@ -28,10 +28,12 @@ Download [whistle.step](whistle.step).
 
 1. Setup
 
-```
+```bash
 git clone https://github.com/jmalenko/whistle.git
 chmod a+x *.py *.sh
+python -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 2. Create the model with *ANNA* by running with
